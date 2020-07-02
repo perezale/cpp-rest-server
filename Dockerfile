@@ -138,7 +138,7 @@ WORKDIR /src
 
 COPY CMakeLists.txt /tmp
 
-COPY main2.cpp /tmp
+COPY main.cpp /tmp
 COPY /header /tmp/header
 COPY /source /tmp/source
 COPY /resources /tmp/resources
@@ -147,7 +147,7 @@ COPY /resources /tmp/resources
 
 RUN cd /tmp && \
  g++ -g -Wl,-Bstatic -static-libgcc  -std=c++11 \   
-	main2.cpp \
+	main.cpp \
     	$(ls header/*) \
 	$(ls source/*) \
 	-o /tmp/app \
