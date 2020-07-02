@@ -65,18 +65,36 @@ private:
 
     void handle_get(http_request message)
     {
+        // Decode uri (relative path)
+        auto path = uri::decode(message.relative_uri().path());
 
+        if (!path.empty() && path != U("/")) {
+            message.reply(status_codes::BadRequest, U("Service available at /"));
+            return;
+        }
+        // Split query
+        auto query = uri::split_query(message.request_uri().query());
+        // Find parameter "url"
+        auto itUrl = query.find(U("url"));
+        if(itUrl == query.end())
+        {
+            message.reply(status_codes::BadRequest, U("Service available at /"));
+            return;
+        }
+        auto url = itUrl->second;
         //Mat src = imread(U("resources/testImage.png"), IMREAD_COLOR);
-        Mat src = curlImg("http://www.pladema.net/wp-content/uploads/2014/06/logo-pladema-2014-horizontal.png");
+        Mat src = curlImg(url.c_str());
         if (src.empty()){
             cout<<"Error in image"<<endl;
             message.reply(status_codes::BadRequest, U("Error in image"));
             return;
         }        
 
+        // Build output
         auto response = json::value::object();
         response["resolution"] = json::value::string( to_string(src.cols)+ "," + to_string(src.rows));
         response["http_method"] = json::value::string(methods::GET);
+        response["url"] = json::value::string(url);
         // response = U("Hello world!");
         message.reply(status_codes::OK, response);
     }
